@@ -50,19 +50,46 @@ services:
     #   - dev     
     command: "uvicorn main:app --host=0.0.0.0 --reload --port=${RECIPE_API_PORT}"
 
-  recipe-scraper: 
-    build: ${RECIPE_SCRAPER_PATH}
-    image: ${RECIPE_SCRAPER_NAME}:${TAG}
-    volumes:
-      - type: bind
-        source: ${RECIPE_SCRAPER_PATH}
-        target: /app
-    # networks:
-    #   - dev     
-    command: "python test.py" 
-    # TODO: run cron job
+  # recipe-scraper: 
+  #   build: ${RECIPE_SCRAPER_PATH}
+  #   image: ${RECIPE_SCRAPER_NAME}:${TAG}
+  #   volumes:
+  #     - type: bind
+  #       source: ${RECIPE_SCRAPER_PATH}
+  #       target: /app
+  #   # networks:
+  #   #   - dev     
+  #   command: "python test.py" 
+  #   # TODO: run cron job
 
+  postgres:
+    container_name: ${RECIPE_DB_NAME}
+    image: postgres
+    hostname: ${RECIPE_DB_NAME}
+    ports:
+      - ${RECIPE_DB_PORT}:${RECIPE_DB_PORT}
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: TEST_SM
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
   
-# networks:
-#   dev: 
+# # networks:
+# #   dev: 
     
