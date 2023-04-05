@@ -50,18 +50,6 @@ services:
     #   - dev     
     command: "uvicorn main:app --host=0.0.0.0 --reload --port=${RECIPE_API_PORT}"
 
-  # recipe-scraper: 
-  #   build: ${RECIPE_SCRAPER_PATH}
-  #   image: ${RECIPE_SCRAPER_NAME}:${TAG}
-  #   volumes:
-  #     - type: bind
-  #       source: ${RECIPE_SCRAPER_PATH}
-  #       target: /app
-  #   # networks:
-  #   #   - dev     
-  #   command: "python test.py" 
-  #   # TODO: run cron job
-
   postgres:
     container_name: ${RECIPE_DB_NAME}
     image: postgres
@@ -86,6 +74,29 @@ services:
       PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
       PGADMIN_DEFAULT_PASSWORD: admin
     restart: unless-stopped
+
+  flyway:
+    image: flyway/flyway:9.8.1
+    command: -url=jdbc:postgresql://${RECIPE_DB_NAME}:${RECIPE_DB_PORT}/recipedb -schemas=recipe-schema -user=postgres -password=admin -connectRetries=60 migrate
+    volumes:
+      - ./sql:/flyway/sql
+      - ./postgres-driver:/flyway/drivers
+    depends_on:
+      - postgres
+
+  recipe-scraper: 
+    build: ${RECIPE_SCRAPER_PATH}
+    image: ${RECIPE_SCRAPER_NAME}:${TAG}
+    volumes:
+      - type: bind
+        source: ${RECIPE_SCRAPER_PATH}
+        target: /app
+    # networks:
+    #   - dev     
+    depends_on:
+      - flyway
+    command: "python test.py" 
+    # TODO: run cron job
 
 volumes:
   postgres-data:
