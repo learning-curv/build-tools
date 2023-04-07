@@ -59,7 +59,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: TEST_SM
+      POSTGRES_DB: recipedb
     volumes:
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -91,13 +91,10 @@ services:
       - type: bind
         source: ${RECIPE_SCRAPER_PATH}
         target: /app
-    # networks:
-    #   - dev     
     depends_on:
       - flyway
-    command: "python test.py" 
-    # TODO: run cron job
-
+    # command: "python test.py" 
+    
 volumes:
   postgres-data:
   
