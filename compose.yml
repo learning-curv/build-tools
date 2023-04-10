@@ -93,7 +93,7 @@ services:
         target: /app
     depends_on:
       - flyway
-    # command: "python test.py" 
+    command: "python test.py" 
     
 volumes:
   postgres-data:
